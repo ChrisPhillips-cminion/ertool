@@ -2480,12 +2480,19 @@ public class AnalyticsProcessor {
 			// we could not find a position in the doc that has a bracket so
 			// just pull the rest into the result message
 			else if (idx < 0) {
-				str.append(message.substring(i));
+				String data = message.substring(i);
+				str.append(data);
 				break;
 			}
 		}
 
 		return str.toString();
+	}
+
+	public static String escapeHtml(String input) {
+		if(input == null) return null;
+		
+		return input.replace("&","&amp;").replace("<", "&lt;").replace(">", "&gt;");
 	}
 
 	private XPathCache getDocCachedList(Document cidDoc, String xPathQuery) {
@@ -2591,6 +2598,8 @@ public class AnalyticsProcessor {
 			if (value == null)
 				return "";
 		}
+		
+		value = escapeHtml(value);
 
 		return value;
 	}

@@ -23,9 +23,109 @@ li { font-size:12px; }
     margin:0 auto;
     position: relative; }
 #sidebar_inner {
-	top: 16%;
+	top: 20%;
     position:fixed;
+    z-index: 300;
 	}
+
+/* Severity-colored textHeader rows */
+div.textHeader {
+	   border-left: 5px solid #ccc;
+	   padding-left: 6px;
+	   margin-top: 3px;
+	   transition: background-color 0.1s;
+}
+div.textHeader:hover {
+	   filter: brightness(0.95);
+}
+div.textHeader.sev-critical {
+	   border-left-color: #8B0000;
+	   background-color: #fff0f0;
+}
+div.textHeader.sev-error {
+	   border-left-color: #CC3300;
+	   background-color: #fff5f0;
+}
+div.textHeader.sev-warning {
+	   border-left-color: #B8860B;
+	   background-color: #fffbf0;
+}
+div.textHeader.sev-info {
+	   border-left-color: #1a5276;
+	   background-color: #f0f8ff;
+}
+
+/* Severity badge inside table cells */
+.sev-badge {
+	   display: inline-block;
+	   padding: 2px 8px;
+	   border-radius: 3px;
+	   font-size: 11px;
+	   font-weight: bold;
+	   color: #fff;
+	   white-space: nowrap;
+}
+.sev-badge.critical { background-color: #8B0000; }
+.sev-badge.error    { background-color: #CC3300; }
+.sev-badge.warning  { background-color: #B8860B; }
+.sev-badge.info     { background-color: #1a5276; }
+
+/* Cleaner table styling */
+div.textBody table {
+	   border-collapse: collapse;
+	   width: 100%;
+	   font-size: 12px;
+}
+div.textBody table td {
+	   padding: 4px 8px;
+	   vertical-align: top;
+}
+div.textBody {
+	   margin-bottom: 2px;
+	   border-left: 3px solid #e0e0e0;
+	   margin-left: 5px;
+}
+div.textBody.sev-critical { border-left-color: #8B0000; }
+div.textBody.sev-error    { border-left-color: #CC3300; }
+div.textBody.sev-warning  { border-left-color: #B8860B; }
+div.textBody.sev-info     { border-left-color: #1a5276; }
+
+/* ===== STICKY HEADER BAR ===== */
+body {
+    padding-top: 0;  /* will be set dynamically by JS after sticky bar renders */
+}
+#sticky-header {
+    position: top;
+    top: 0;
+    z-index: 200;
+    background-color: #2c2c3e;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+}
+/* Override the default div background inside sticky header */
+#sticky-header ul#tabs {
+    background-color: #2c2c3e;
+    padding: 4px 6px 2px 6px;
+    margin: 0;
+}
+#sticky-header ul#tabs li a#filterbutton {
+    color: #e0e0e0;
+    background-color: #3a3a55;
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 2px 7px;
+    margin: 1px 2px;
+    display: inline-block;
+    font-size: 11px;
+}
+#sticky-header ul#tabs li a#filterbutton:hover {
+    background-color: #505075;
+    color: #fff;
+}
+/* Banner sits flush below the tab bar inside the sticky wrapper */
+#sticky-header {
+    margin-bottom: 0;
+    border-top: 1px solid #444;
+}
 </style>
 
 <script language="JavaScript" type="text/javascript">
@@ -622,4 +722,42 @@ drawText("filesystemCanvas", encryptedName, "blue", 63);
 
 }
 
+</script>
+<script language="JavaScript" type="text/javascript">
+/* ===== IMPROVED VISUAL STYLING — severity classes + summary banner ===== */
+
+var SEVERITY_ORDER = ['critical','error','warning','info'];
+
+function getPrimarySeverity(fieldtype) {
+    if (!fieldtype) return null;
+    var ft = fieldtype.toLowerCase();
+    for (var i = 0; i < SEVERITY_ORDER.length; i++) {
+        if (ft.indexOf(SEVERITY_ORDER[i]) !== -1) return SEVERITY_ORDER[i];
+    }
+    return null;
+}
+
+function applyVisualStyling() {
+    var headers = document.getElementsByClassName('textHeader');
+    var counts = { critical:0, error:0, warning:0, info:0 };
+
+    for (var i = 0; i < headers.length; i++) {
+        var hdr = headers[i];
+        var ft = hdr.getAttribute('fieldtype') || '';
+        var sev = getPrimarySeverity(ft);
+        if (!sev) continue;
+
+        // Add severity class to header
+        hdr.classList.add('sev-' + sev);
+        counts[sev]++;
+
+        // Also add severity class to matching body div
+        var hdrId = hdr.id;
+        if (hdrId) {
+            var bodyId = hdrId.replace('header', '');
+            var bodyDiv = document.getElementById(bodyId);
+            if (bodyDiv) bodyDiv.classList.add('sev-' + sev);
+        }
+    }
+}
 </script>

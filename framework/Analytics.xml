@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Analytics version="DataPower_4.0.15.2" date="Feb 9 2026 10:30AM EST">
+<Analytics version="DataPower_4.0.16" date="Mar 1 2026 8:00AM EST">
 	<Formula CollapseResult="true" FormulaID="IsHardwareDevice">
 		<Expression LogLevel="Warning" NextOperation="And">
 			<Section Name="LicenseStatus" XPath="/Status/LicenseStatus//Feature"/>
@@ -130,6 +130,60 @@
 			<Condition FieldPosition="7" Operation="LessThan" Value="7"/>
 		</Expression>
 	</Formula>
+	
+	<!-- HTTP/2 APAR considerations in October 2025 fixpacks -->
+	<Formula CollapseResult="true" FormulaID="APARCHECK:October_HTTP2">
+	<!-- Expression 1: Detect 10.5.0.0 through 10.5.0.18 -->
+	<Expression LogLevel="Info">
+		<Section Name="FirmwareVersion3" XPath="/Status/FirmwareVersion3//Version"/>
+		<RegExp>([A-Z]{2,4})[0-9]{0,2}.(((10|2018|2019|20[2-9][0-9])\.(\d+)\.(\d+))\.(\d+))([a-zA-Z0-9]*)</RegExp>
+		<Condition FieldPosition="4" Operation="EqualsTo" Value="10" NextOperation="And"/>
+		<Condition FieldPosition="5" Operation="EqualsTo" Value="5" NextOperation="And"/>
+		<Condition FieldPosition="6" Operation="EqualsTo" Value="0" NextOperation="And"/>
+		<Condition FieldPosition="7" Operation="LessThan" Value="19"/>
+	</Expression>
+	<!-- Expression 2: Detect 10.6.0.0 through 10.6.0.6 -->
+	<Expression LogLevel="Info">
+		<Section Name="FirmwareVersion3" XPath="/Status/FirmwareVersion3//Version"/>
+		<RegExp>([A-Z]{2,4})[0-9]{0,2}.(((10|2018|2019|20[2-9][0-9])\.(\d+)\.(\d+))\.(\d+))([a-zA-Z0-9]*)</RegExp>
+		<Condition FieldPosition="4" Operation="EqualsTo" Value="10" NextOperation="And"/>
+		<Condition FieldPosition="5" Operation="EqualsTo" Value="6" NextOperation="And"/>
+		<Condition FieldPosition="6" Operation="EqualsTo" Value="0" NextOperation="And"/>
+		<Condition FieldPosition="7" Operation="LessThan" Value="7"/>
+	</Expression>
+	<!-- Expression 3: Detect 10.6.1.x -->
+	<Expression LogLevel="Info">
+		<Section Name="FirmwareVersion3" XPath="/Status/FirmwareVersion3//Version"/>
+		<RegExp>([A-Z]{2,4})[0-9]{0,2}.(((10|2018|2019|20[2-9][0-9])\.(\d+)\.(\d+))\.(\d+))([a-zA-Z0-9]*)</RegExp>
+		<Condition FieldPosition="4" Operation="EqualsTo" Value="10" NextOperation="And"/>
+		<Condition FieldPosition="5" Operation="EqualsTo" Value="6" NextOperation="And"/>
+		<Condition FieldPosition="6" Operation="EqualsTo" Value="1"/>
+	</Expression>
+	<!-- Expression 4: Detect 10.6.2.x -->
+	<Expression LogLevel="Info">
+		<Section Name="FirmwareVersion3" XPath="/Status/FirmwareVersion3//Version"/>
+		<RegExp>([A-Z]{2,4})[0-9]{0,2}.(((10|2018|2019|20[2-9][0-9])\.(\d+)\.(\d+))\.(\d+))([a-zA-Z0-9]*)</RegExp>
+		<Condition FieldPosition="4" Operation="EqualsTo" Value="10" NextOperation="And"/>
+		<Condition FieldPosition="5" Operation="EqualsTo" Value="6" NextOperation="And"/>
+		<Condition FieldPosition="6" Operation="EqualsTo" Value="2"/>
+	</Expression>
+	<!-- Expression 5: Detect 10.6.3.x -->
+	<Expression LogLevel="Info">
+		<Section Name="FirmwareVersion3" XPath="/Status/FirmwareVersion3//Version"/>
+		<RegExp>([A-Z]{2,4})[0-9]{0,2}.(((10|2018|2019|20[2-9][0-9])\.(\d+)\.(\d+))\.(\d+))([a-zA-Z0-9]*)</RegExp>
+		<Condition FieldPosition="4" Operation="EqualsTo" Value="10" NextOperation="And"/>
+		<Condition FieldPosition="5" Operation="EqualsTo" Value="6" NextOperation="And"/>
+		<Condition FieldPosition="6" Operation="EqualsTo" Value="3"/>
+	</Expression>
+	<!-- Expression 6: Detect 10.6.4.x -->
+	<Expression LogLevel="Info">
+		<Section Name="FirmwareVersion3" XPath="/Status/FirmwareVersion3//Version"/>
+		<RegExp>([A-Z]{2,4})[0-9]{0,2}.(((10|2018|2019|20[2-9][0-9])\.(\d+)\.(\d+))\.(\d+))([a-zA-Z0-9]*)</RegExp>
+		<Condition FieldPosition="4" Operation="EqualsTo" Value="10" NextOperation="And"/>
+		<Condition FieldPosition="5" Operation="EqualsTo" Value="6" NextOperation="And"/>
+		<Condition FieldPosition="6" Operation="EqualsTo" Value="4"/>
+	</Expression>
+</Formula>
 	
 	<!-- March 2018 7.5.2.13 and 7.6.0.6 fixpack tracking -->
 	<Formula CollapseResult="true" FormulaID="APARCHECK:IT23520">
@@ -1986,7 +2040,72 @@
 			<Condition FieldPosition="0" ConditionName="LicenseAvailable" Operation="NotEqualTo" Value=""/>
 		</Expression>
 	</Formula>
-	
+		
+	<Formula OmitPrintingMetConditions="true" TopPositionResult="true" Categories="network;configuration">
+		<Name>{Condition:SectionName} Network Interface Status Summary</Name>
+		<DisplayMessage>{Condition:InterfaceName}||{Condition:OperStatus}||{Condition:IPType}||{Condition:IP}||{Condition:MACAddress}||{Condition:MTU}||{Condition:RxBytes}||{Condition:RxPackets}||{Condition:RxErrors}||{Condition:TxBytes}||{Condition:TxPackets}||{Condition:TxErrors}</DisplayMessage>
+		<Expression LogLevel="Info" NextOperation="And">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/Name[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="0" ConditionName="InterfaceName" Operation="NotEqualTo" Value=""/>
+		</Expression>
+		<Expression LogLevel="Info" NextOperation="And">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/OperStatus[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="1" ConditionName="OperStatus" Operation="NotEqualTo" Value=""/>
+		</Expression>
+		<Expression LogLevel="Info" NextOperation="And">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/IPType[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="2" ConditionName="IPType" Operation="NotEqualTo" Value=""/>
+		</Expression>
+		<Expression LogLevel="Info" NextOperation="And">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/IP[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="3" ConditionName="IP" Operation="NotEqualTo" Value=""/>
+		</Expression>
+		<Expression LogLevel="Info" NextOperation="And">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/MACAddress[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="4" ConditionName="MACAddress" Operation="NotEqualTo" Value=""/>
+		</Expression>
+		<Expression LogLevel="Info" NextOperation="And">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/MTU[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="5" ConditionName="MTU" Operation="NotEqualTo" Value=""/>
+		</Expression>
+		<Expression LogLevel="Info" NextOperation="And">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/RxHCBytes[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="6" ConditionName="RxBytes" Operation="NotEqualTo" Value=""/>
+		</Expression>
+		<Expression LogLevel="Info" NextOperation="And">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/RxHCPackets[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="7" ConditionName="RxPackets" Operation="NotEqualTo" Value=""/>
+		</Expression>
+		<Expression LogLevel="Info" NextOperation="And">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/RxErrors2[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="8" ConditionName="RxErrors" Operation="NotEqualTo" Value=""/>
+		</Expression>
+		<Expression LogLevel="Info" NextOperation="And">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/TxHCBytes[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="9" ConditionName="TxBytes" Operation="NotEqualTo" Value=""/>
+		</Expression>
+		<Expression LogLevel="Info" NextOperation="And">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/TxHCPackets[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="10" ConditionName="TxPackets" Operation="NotEqualTo" Value=""/>
+		</Expression>
+		<Expression LogLevel="Info">
+			<Section Name="NetworkInterfaceStatus" Wildcard="True" XPath="/Status/NetworkInterfaceStatus/TxErrors2[../AdminStatus/text() = 'up']"/>
+			<RegExp>*</RegExp>
+			<Condition FieldPosition="0" TableMapPosition="11" ConditionName="TxErrors" Operation="NotEqualTo" Value=""/>
+		</Expression>
+	</Formula>
+
 	<!-- end of basic info cascaded -->
 	
 	
@@ -2019,6 +2138,20 @@
 	</Formula>
 	<!-- end of throttler search -->
 	
+	<Formula Categories="general;failure;network">
+		<Name>{Condition:SectionName} Source Handler {Condition:ObjectType} is configured for HTTP 2.0 &lt;font color='#006666'&gt;{Condition:ObjectName}&lt;/font&gt;, see known issues.</Name>
+		<URL description="APAR DT442595 (Fix in 10.6.5.0+, 10.6.0.7, and 10.5.0.19): DataPower HTTP/2 server might not honor idle timeout: ">https://www.ibm.com/mysupport/s/defect/aCI3p000000L6XFGA0/dt442595</URL>
+		<URL description="APAR DT446624 (Fix in 10.6.5.0+, 10.6.0.7, and 10.5.0.19): Excessive HTTP/2 reset frame rates can cause CPU spin: ">https://www.ibm.com/mysupport/s/defect/aCI3p000000L8XEGA0/dt446624</URL>
+		<Expression LogLevel="Warning" FormulaIDMatch="APARCHECK:October_HTTP2">
+			<Section Name="&lt;([a-zA-Z-_.0-9]+)-config@datapower.ibm.com&gt;" Wildcard="True" XPath="/Root/text()"/>
+			<Section Name=".cfg" Wildcard="True" XPath="/Root/text()"/>
+			<RegExp>(source-http[s]{0,1}) "([a-zA-Z-_.0-9]+)"\W+(\w+\W+)*?(allowed-features "([a-zA-Z0-9.\-\+]+)"|exit)</RegExp>
+			<Condition FieldPosition="1" RegGroup="All" ConditionName="ObjectType" Operation="NotEqualTo" Value="" NextOperation="And"/>
+			<Condition FieldPosition="2" RegGroup="All" ConditionName="ObjectName" Operation="NotEqualTo" Value="" NextOperation="And"/>
+			<Condition FieldPosition="5" RegGroup="All" ConditionName="Features" Operation="Contains" Value="HTTP-2.0"/>
+		</Expression>
+	</Formula>
+
 	<!-- APAR IT16765, can trigger throttler -->
     <Formula Categories="configuration;cpuload;memory;failure">
         <Name>&lt;font color='#CC3300'&gt;{Condition:SectionName}&lt;/font&gt; There is an XML-Manager &lt;font color='#CC3300'&gt;{Condition:XMLManager}&lt;/font&gt; with compile-options &lt;font color='#CC3300'&gt;{Condition:CompileOptionsObject}&lt;/font&gt; configured with custom stack-size &lt;font color='#CC3300'&gt;{Condition:CompileStackSize}&lt;/font&gt;.  The device may throttle and/or reload unexpectedly due to this configuration.  This issue has been reported with stack-size of 10MB or higher reported (this has been established after APAR text was created which states 16MB).  Reduce the stack-size configured or upgrade to the fixpack level required by the APAR noted.</Name>
@@ -4738,10 +4871,53 @@
 		</Expression>
 	</Formula>
 	<!-- end of latency line search -->
-	
+	<Formula CollapseResult="true" FormulaID="APARCHECK:DT450624">
+		<Expression LogLevel="Info">
+			<Section Name="FirmwareVersion3" XPath="/Status/FirmwareVersion3//Version"/>
+			<RegExp>([A-Z]{2,4})[0-9]{0,2}.(((10|2018|2019|20[2-9][0-9])\.(\d+)\.(\d+))\.(\d+))([a-zA-Z0-9]*)</RegExp>
+			<Condition FieldPosition="4" Operation="EqualsTo" Value="10" NextOperation="And"/>
+			<Condition FieldPosition="5" Operation="EqualsTo" Value="6" NextOperation="And"/>
+			<Condition FieldPosition="6" Operation="EqualsTo" Value="0" NextOperation="And"/>
+			<Condition FieldPosition="7" Operation="LessThan" Value="7"/>
+		</Expression>
+		<!-- Expression 3: Detect 10.6.1.x -->
+		<Expression LogLevel="Info">
+			<Section Name="FirmwareVersion3" XPath="/Status/FirmwareVersion3//Version"/>
+			<RegExp>([A-Z]{2,4})[0-9]{0,2}.(((10|2018|2019|20[2-9][0-9])\.(\d+)\.(\d+))\.(\d+))([a-zA-Z0-9]*)</RegExp>
+			<Condition FieldPosition="4" Operation="EqualsTo" Value="10" NextOperation="And"/>
+			<Condition FieldPosition="5" Operation="EqualsTo" Value="6" NextOperation="And"/>
+			<Condition FieldPosition="6" Operation="EqualsTo" Value="1"/>
+		</Expression>
+		<!-- Expression 4: Detect 10.6.2.x -->
+		<Expression LogLevel="Info">
+			<Section Name="FirmwareVersion3" XPath="/Status/FirmwareVersion3//Version"/>
+			<RegExp>([A-Z]{2,4})[0-9]{0,2}.(((10|2018|2019|20[2-9][0-9])\.(\d+)\.(\d+))\.(\d+))([a-zA-Z0-9]*)</RegExp>
+			<Condition FieldPosition="4" Operation="EqualsTo" Value="10" NextOperation="And"/>
+			<Condition FieldPosition="5" Operation="EqualsTo" Value="6" NextOperation="And"/>
+			<Condition FieldPosition="6" Operation="EqualsTo" Value="2"/>
+		</Expression>
+		<!-- Expression 5: Detect 10.6.3.x -->
+		<Expression LogLevel="Info">
+			<Section Name="FirmwareVersion3" XPath="/Status/FirmwareVersion3//Version"/>
+			<RegExp>([A-Z]{2,4})[0-9]{0,2}.(((10|2018|2019|20[2-9][0-9])\.(\d+)\.(\d+))\.(\d+))([a-zA-Z0-9]*)</RegExp>
+			<Condition FieldPosition="4" Operation="EqualsTo" Value="10" NextOperation="And"/>
+			<Condition FieldPosition="5" Operation="EqualsTo" Value="6" NextOperation="And"/>
+			<Condition FieldPosition="6" Operation="EqualsTo" Value="3"/>
+		</Expression>
+		<!-- Expression 6: Detect 10.6.4.x -->
+		<Expression LogLevel="Info">
+			<Section Name="FirmwareVersion3" XPath="/Status/FirmwareVersion3//Version"/>
+			<RegExp>([A-Z]{2,4})[0-9]{0,2}.(((10|2018|2019|20[2-9][0-9])\.(\d+)\.(\d+))\.(\d+))([a-zA-Z0-9]*)</RegExp>
+			<Condition FieldPosition="4" Operation="EqualsTo" Value="10" NextOperation="And"/>
+			<Condition FieldPosition="5" Operation="EqualsTo" Value="6" NextOperation="And"/>
+			<Condition FieldPosition="6" Operation="EqualsTo" Value="4"/>
+		</Expression>
+	</Formula>
+
 	<Formula Categories="memory;cpuload">
 		<Name>{Condition:SectionName} Growth in ActiveUsers due to ITCAM/XML-MGMT Usage, counted {Condition:UserCount} 'system' connections.</Name>
 		<DisplayMessage>Workarounds.  A) Change web-mgmt idle-timeout to be shorter (60 seconds), this will clean-up entries faster.  B) Disable ITCAM/Xml-Mgmt monitor or xml-mgmt interface.</DisplayMessage>
+		<URL FormulaIDMatch="APARCHECK:DT450624" description="APAR DT450624 : Active sessions of a deleted user do not automatically disconnect">https://www.ibm.com/mysupport/s/defect/aCIgJ0000005Fxh/dt450624</URL>
 		<Expression LogLevel="Critical">
 			<Section Name="ActiveUsers" Wildcard="True" XPath="count(/Status/ActiveUsers//connection[text()='system' or text()='saml-artifact'])"/>
 			<RegExp>*</RegExp>
